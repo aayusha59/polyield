@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { Header } from "@/components/header"
+import AppWalletProvider from "@/components/AppWalletProvider"
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -23,8 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistMono.variable} antialiased`} suppressHydrationWarning>
-        <Header />
-        {children}
+        <AppWalletProvider>
+          <Header />
+          {children}
+        </AppWalletProvider>
       </body>
     </html>
   )

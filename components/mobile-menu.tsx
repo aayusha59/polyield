@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog"
 import { Menu, X } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
 
 interface MobileMenuProps {
   className?: string
@@ -61,14 +62,8 @@ export const MobileMenu = ({ className }: MobileMenuProps) => {
               </Link>
             ))}
 
-            <div className="mt-6">
-              <Link
-                href="/#connect-wallet"
-                onClick={handleLinkClick}
-                className="inline-block text-xl font-mono uppercase text-primary transition-colors ease-out duration-150 hover:text-primary/80 py-2"
-              >
-                Connect Wallet
-              </Link>
+            <div className="mt-6 flex justify-center">
+              <WalletMultiButton style={{ backgroundColor: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontFamily: "var(--font-mono)", fontSize: "1.25rem", height: "auto", padding: "0.5rem 1rem", borderRadius: "0", width: "100%", justifyContent: "center" }} />
             </div>
           </nav>
         </Dialog.Content>

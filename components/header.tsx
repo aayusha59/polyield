@@ -1,6 +1,9 @@
+"use client"
+
 import Link from "next/link"
 import { Logo } from "./logo"
 import { MobileMenu } from "./mobile-menu"
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
 
 export const Header = () => {
   return (
@@ -20,12 +23,9 @@ export const Header = () => {
             </Link>
           ))}
         </nav>
-        <Link
-          className="uppercase max-lg:hidden transition-colors ease-out duration-150 font-mono text-primary hover:text-primary/80"
-          href="/#connect-wallet"
-        >
-          Connect Wallet
-        </Link>
+        <div className="max-lg:hidden">
+          <WalletMultiButton style={{ backgroundColor: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontFamily: "var(--font-mono)", fontSize: "0.875rem", height: "auto", padding: "0.5rem 1rem", borderRadius: "0" }} />
+        </div>
         <MobileMenu />
       </header>
     </div>
