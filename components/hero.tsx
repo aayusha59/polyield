@@ -39,21 +39,24 @@ export function Hero() {
           </Button>
         </Link>
 
-        <div className="flex items-center justify-center gap-8 mt-8 relative z-20">
-          <Image
-            src="/polymarket.png"
-            alt="Polymarket"
-            width={192}
-            height={48}
-            className="h-12 w-auto object-contain"
-          />
-          <Image
-            src="/solana.png"
-            alt="Solana"
-            width={120}
-            height={30}
-            className="h-7 w-auto object-contain"
-          />
+        <div className="mt-18 relative z-20">
+          <p className="text-xs font-mono text-foreground/40 mb-3 tracking-wider">POWERED BY</p>
+          <div className="flex items-center justify-center gap-8">
+            <Image
+              src="/polymarket.png"
+              alt="Polymarket"
+              width={192}
+              height={48}
+              className="h-12 w-auto object-contain"
+            />
+            <Image
+              src="/solana.png"
+              alt="Solana"
+              width={120}
+              height={30}
+              className="h-7 w-auto object-contain"
+            />
+          </div>
         </div>
       </div>
     </div>
