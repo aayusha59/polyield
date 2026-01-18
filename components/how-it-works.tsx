@@ -1,6 +1,10 @@
 "use client"
 
 import { ArrowRight, CircleDollarSign, PiggyBank, Trophy, Wallet, Users, Repeat } from "lucide-react"
+import { useWallet } from "@solana/wallet-adapter-react"
+import { useWalletModal } from "@solana/wallet-adapter-react-ui"
+import { useRouter } from "next/navigation"
+import { Button } from "./ui/button"
 
 const steps = [
   {
@@ -32,6 +36,18 @@ const steps = [
 ]
 
 export function HowItWorks() {
+  const { connected } = useWallet()
+  const { setVisible } = useWalletModal()
+  const router = useRouter()
+
+  const handleGetStarted = () => {
+    if (connected) {
+      router.push("/markets")
+    } else {
+      setVisible(true)
+    }
+  }
+
   return (
     <section id="how-it-works" className="py-24 border-t border-border/50">
       <div className="container">
@@ -231,6 +247,16 @@ export function HowItWorks() {
             <p className="text-foreground/70 font-mono text-sm italic max-w-2xl mx-auto">
               "Markets that matter most automatically become the most rewarding — without anyone taking on more risk."
             </p>
+          </div>
+
+          {/* CTA Button */}
+          <div className="mt-12 text-center">
+            <Button
+              onClick={handleGetStarted}
+              className="font-mono px-8 py-6 text-base"
+            >
+              {connected ? "Start Predicting" : "Connect Wallet to Get Started"}
+            </Button>
           </div>
         </div>
       </div>
