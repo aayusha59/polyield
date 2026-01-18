@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Loader2, CheckCircle, ExternalLink, AlertCircle, Wallet } from "lucide-react"
+import { X, Loader2, CheckCircle, ExternalLink, AlertCircle, Wallet, Shield, TrendingUp, RefreshCw } from "lucide-react"
 import { useWallet } from "@solana/wallet-adapter-react"
 import { useWalletModal } from "@solana/wallet-adapter-react-ui"
 import { useDeposit } from "@/hooks/use-deposit"
+import { usePositions } from "@/hooks/use-positions"
 import { Position } from "@/lib/solana/constants"
 import { Button } from "./ui/button"
 
@@ -13,6 +14,7 @@ interface DepositModalProps {
   onClose: () => void
   marketId: string
   marketQuestion: string
+  marketExpiry: string
   position: "yes" | "no"
   currentOdds: number
 }
@@ -22,6 +24,7 @@ export function DepositModal({
   onClose,
   marketId,
   marketQuestion,
+  marketExpiry,
   position,
   currentOdds,
 }: DepositModalProps) {
@@ -38,6 +41,7 @@ export function DepositModal({
     clearError,
     clearTx,
   } = useDeposit()
+  const { addPosition } = usePositions()
 
   // Refresh balance when modal opens or wallet connects
   useEffect(() => {
@@ -64,7 +68,16 @@ export function DepositModal({
 
   const handleDeposit = async () => {
     if (numericAmount <= 0) return
-    await deposit(numericAmount, marketId, positionEnum)
+    const signature = await deposit(numericAmount, marketId, positionEnum)
+
+    if (signature) {
+      // Parse expiry string to timestamp, fallback to 30 days from now
+      const expiryTimestamp = marketExpiry
+        ? new Date(marketExpiry).getTime()
+        : Date.now() + (30 * 24 * 60 * 60 * 1000)
+
+      addPosition(marketId, marketQuestion, positionEnum, numericAmount, expiryTimestamp)
+    }
   }
 
   const handleConnectWallet = () => {
@@ -82,11 +95,11 @@ export function DepositModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="relative bg-[#0a0a0a] border border-border/50 w-full max-w-md mx-4 p-6">
         {/* Close button */}
@@ -99,16 +112,19 @@ export function DepositModal({
 
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <span className={`font-mono text-sm uppercase px-2 py-0.5 border ${
-              position === "yes" 
-                ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" 
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <span className={`font-mono text-sm uppercase px-2 py-0.5 border ${position === "yes"
+                ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
                 : "text-rose-400 border-rose-500/30 bg-rose-500/10"
-            }`}>
+              }`}>
               Predict {position}
             </span>
             <span className="font-mono text-xs text-foreground/40">
               @ {currentOdds}%
+            </span>
+            <span className="font-mono text-[10px] uppercase px-1.5 py-0.5 border border-amber-500/30 bg-amber-500/10 text-amber-400 flex items-center gap-1 ml-auto">
+              <Shield className="w-2.5 h-2.5" />
+              No-Loss
             </span>
           </div>
           <h3 className="text-lg font-sentient leading-tight line-clamp-2">
@@ -120,13 +136,20 @@ export function DepositModal({
         {txSignature && (
           <div className="space-y-4">
             <div className="flex flex-col items-center text-center py-6">
-              <CheckCircle className="w-12 h-12 text-emerald-400 mb-4" />
+              <div className="relative mb-4">
+                <CheckCircle className="w-12 h-12 text-emerald-400" />
+                <Shield className="w-5 h-5 text-emerald-400 absolute -bottom-1 -right-1 bg-[#0a0a0a] rounded-full p-0.5" />
+              </div>
               <h4 className="font-mono text-lg text-emerald-400 mb-2">
-                Deposit Successful!
+                Position Secured!
               </h4>
-              <p className="text-foreground/60 text-sm mb-4">
-                Your {numericAmount.toFixed(2)} USDC has been deposited to the {position.toUpperCase()} position.
+              <p className="text-foreground/60 text-sm mb-2">
+                {numericAmount.toFixed(2)} USDC deposited on {position.toUpperCase()}
               </p>
+              <div className="flex items-center gap-1.5 text-emerald-400/80 text-xs font-mono mb-4">
+                <Shield className="w-3.5 h-3.5" />
+                Your principal is protected
+              </div>
               {solscanUrl && (
                 <a
                   href={solscanUrl}
@@ -196,24 +219,68 @@ export function DepositModal({
                   </div>
                 </div>
 
-                {/* Potential Payout */}
+                {/* No-Loss Guarantee Banner */}
+                <div className="flex items-center gap-2 bg-emerald-500/5 border border-emerald-500/20 px-3 py-2">
+                  <Shield className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <p className="text-xs font-mono text-emerald-400/90">
+                    Principal Protected — You cannot lose your stake
+                  </p>
+                </div>
+
+                {/* Potential Outcomes */}
                 {numericAmount > 0 && (
-                  <div className="bg-[#1a1a1a] border border-border/30 p-4 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-foreground/60 font-mono">Your Stake</span>
+                  <div className="bg-[#1a1a1a] border border-border/30 p-4 space-y-3">
+                    {/* Your Stake */}
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-foreground/60 font-mono flex items-center gap-1.5">
+                        <Shield className="w-3.5 h-3.5 text-emerald-500/60" />
+                        Your Stake (Protected)
+                      </span>
                       <span className="font-mono">{numericAmount.toFixed(2)} USDC</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-foreground/60 font-mono">If {position.toUpperCase()} wins</span>
-                      <span className="font-mono text-emerald-400">
-                        +{potentialProfit.toFixed(2)} USDC
+
+                    {/* Divider */}
+                    <div className="border-t border-border/30" />
+
+                    {/* If You Win */}
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-foreground/60 font-mono flex items-center gap-1.5">
+                        <TrendingUp className="w-3.5 h-3.5 text-emerald-500/60" />
+                        If {position.toUpperCase()} wins
                       </span>
+                      <div className="text-right">
+                        <span className="font-mono text-emerald-400 font-medium">
+                          +{potentialProfit.toFixed(2)} USDC
+                        </span>
+                        <p className="text-[10px] text-foreground/40 font-mono">yield profit</p>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm border-t border-border/30 pt-2">
-                      <span className="text-foreground/60 font-mono">Potential Payout</span>
-                      <span className="font-mono text-foreground font-medium">
-                        {potentialPayout.toFixed(2)} USDC
+
+                    {/* If You Lose */}
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-foreground/60 font-mono flex items-center gap-1.5">
+                        <RefreshCw className="w-3.5 h-3.5 text-amber-500/60" />
+                        If {position.toUpperCase()} loses
                       </span>
+                      <div className="text-right">
+                        <span className="font-mono text-amber-400">
+                          {numericAmount.toFixed(2)} USDC
+                        </span>
+                        <p className="text-[10px] text-foreground/40 font-mono">full refund</p>
+                      </div>
+                    </div>
+
+                    {/* Summary */}
+                    <div className="border-t border-border/30 pt-3 mt-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-foreground/60 font-mono">Max Payout</span>
+                        <span className="font-mono text-foreground font-medium">
+                          {potentialPayout.toFixed(2)} USDC
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-foreground/40 font-mono mt-1">
+                        Stake + Yield if your prediction is correct
+                      </p>
                     </div>
                   </div>
                 )}

@@ -11,6 +11,7 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
+  createTransferInstruction,
   getAccount,
 } from "@solana/spl-token"
 import {
@@ -188,27 +189,63 @@ export async function buildDepositTransaction(
     )
   }
 
-  // Build instruction data
-  const data = buildDepositInstructionData(amountLamports, marketId, position)
+  // --- TEMPORARY: Direct Transfer for Frontend Testing ---
+  // Since the Anchor program isn't deployed yet, we'll simulate the deposit
+  // by transferring USDC directly to the Vault's Token Account.
+  
+  // Get Vault's ATA
+  const vaultTokenAccount = await getAssociatedTokenAddress(
+    USDC_MINT,
+    vault,
+    true // allowOwnerOffCurve = true because vault is a PDA
+  )
 
-  // Build the deposit instruction
+  // Check if Vault ATA exists, if not create it
+  try {
+    await getAccount(connection, vaultTokenAccount)
+  } catch {
+    transaction.add(
+      createAssociatedTokenAccountInstruction(
+        userPublicKey, // payer
+        vaultTokenAccount, // ata
+        vault, // owner
+        USDC_MINT // mint
+      )
+    )
+  }
+
+  // Add Transfer Instruction
+  transaction.add(
+    createTransferInstruction(
+      userTokenAccount, // source
+      vaultTokenAccount, // destination
+      userPublicKey, // owner
+      amountLamports
+    )
+  )
+
+  /* 
+  // Anchor Program Instruction (Commented out until deployment)
+  const data = buildDepositInstructionData(amountLamports, marketId, position)
+  
   const depositInstruction = new TransactionInstruction({
     programId: PROGRAM_ID,
     keys: [
-      { pubkey: userPublicKey, isSigner: true, isWritable: true }, // user
-      { pubkey: USDC_MINT, isSigner: false, isWritable: false }, // mint
-      { pubkey: vaultState, isSigner: false, isWritable: true }, // vault_state
-      { pubkey: vault, isSigner: false, isWritable: true }, // vault
-      { pubkey: userTokenAccount, isSigner: false, isWritable: true }, // user_token_account
-      { pubkey: userDeposit, isSigner: false, isWritable: true }, // user_deposit
-      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }, // token_program
-      { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }, // associated_token_program
-      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false }, // system_program
+      { pubkey: userPublicKey, isSigner: true, isWritable: true },
+      { pubkey: USDC_MINT, isSigner: false, isWritable: false },
+      { pubkey: vaultState, isSigner: false, isWritable: true },
+      { pubkey: vault, isSigner: false, isWritable: true },
+      { pubkey: userTokenAccount, isSigner: false, isWritable: true },
+      { pubkey: userDeposit, isSigner: false, isWritable: true },
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ],
     data,
   })
 
   transaction.add(depositInstruction)
+  */
 
   // Get recent blockhash
   const { blockhash } = await connection.getLatestBlockhash()

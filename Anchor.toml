@@ -1,9 +1,12 @@
+[toolchain]
+anchor_version = "0.30.1"
+
 [features]
 seeds = false
 skip-lint = false
 
 [programs.devnet]
-polyield_vault = "YourProgramIdHere11111111111111111111111111"
+polyield_vault = "FWGiD7WhXu8k7eDtEwr3ZbXbvqwL7kdJgNfugrSVJ7F3"
 
 [registry]
 url = "https://api.apr.dev"
