@@ -6,10 +6,8 @@ export const USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJD
 // USDC has 6 decimals
 export const USDC_DECIMALS = 6
 
-// Program ID - Update this after deploying to devnet
-// Run: anchor keys list to get your program ID
-// Using System Program as placeholder until deployed
-export const PROGRAM_ID = new PublicKey("11111111111111111111111111111111")
+// Program ID - Deployed to devnet
+export const PROGRAM_ID = new PublicKey("FWGiD7WhXu8k7eDtEwr3ZbXbvqwL7kdJgNfugrSVJ7F3")
 
 // Seed constants matching the Anchor program
 export const VAULT_SEED = "vault"

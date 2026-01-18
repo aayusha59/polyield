@@ -6,7 +6,7 @@ use anchor_spl::{
     },
 };
 
-declare_id!("YourProgramIdHere11111111111111111111111111");
+declare_id!("FWGiD7WhXu8k7eDtEwr3ZbXbvqwL7kdJgNfugrSVJ7F3");
 
 #[program]
 pub mod polyield_vault {

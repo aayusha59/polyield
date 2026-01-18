@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, TrendingUp, ExternalLink } from "lucide-react"
+import { Calendar, TrendingUp, ExternalLink, Shield } from "lucide-react"
 import { Button } from "./ui/button"
 import { DepositModal } from "./deposit-modal"
 import Image from "next/image"
@@ -17,11 +17,11 @@ export function MarketCard({ market }: MarketCardProps) {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false)
 
   // Use actual prices if available, otherwise calculate from pools
-  const yesPercentage = market.yesPrice 
-    ? Math.round(market.yesPrice * 100) 
+  const yesPercentage = market.yesPrice
+    ? Math.round(market.yesPrice * 100)
     : Math.round((market.yesPool / market.totalPool) * 100)
-  const noPercentage = market.noPrice 
-    ? Math.round(market.noPrice * 100) 
+  const noPercentage = market.noPrice
+    ? Math.round(market.noPrice * 100)
     : 100 - yesPercentage
 
   const formatCurrency = (value: number) => {
@@ -30,8 +30,8 @@ export function MarketCard({ market }: MarketCardProps) {
     return `$${value}`
   }
 
-  const polymarketUrl = market.slug 
-    ? `https://polymarket.com/event/${market.slug}` 
+  const polymarketUrl = market.slug
+    ? `https://polymarket.com/event/${market.slug}`
     : "https://polymarket.com"
 
   const handleDepositClick = () => {
@@ -67,12 +67,16 @@ export function MarketCard({ market }: MarketCardProps) {
             />
           </div>
         )}
-        
+
         <div className="flex items-center gap-2 mb-4">
           <span className="font-mono text-xs text-primary uppercase tracking-wider px-2 py-1 bg-primary/10 border border-primary/20">
             {market.category}
           </span>
-          <a 
+          <span className="font-mono text-[10px] text-amber-400 uppercase px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 flex items-center gap-1">
+            <Shield className="w-2.5 h-2.5" />
+            No-Loss
+          </span>
+          <a
             href={polymarketUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -101,21 +105,19 @@ export function MarketCard({ market }: MarketCardProps) {
         <div className="grid grid-cols-2 gap-3 mb-6">
           <button
             onClick={() => setSelectedPosition("yes")}
-            className={`py-3 font-mono text-sm uppercase transition-all duration-200 border ${
-              selectedPosition === "yes"
+            className={`py-3 font-mono text-sm uppercase transition-all duration-200 border ${selectedPosition === "yes"
                 ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
                 : "border-border/50 text-foreground/60 hover:border-emerald-500/50 hover:text-emerald-400"
-            }`}
+              }`}
           >
             Predict Yes
           </button>
           <button
             onClick={() => setSelectedPosition("no")}
-            className={`py-3 font-mono text-sm uppercase transition-all duration-200 border ${
-              selectedPosition === "no"
+            className={`py-3 font-mono text-sm uppercase transition-all duration-200 border ${selectedPosition === "no"
                 ? "bg-rose-500/20 border-rose-500 text-rose-400"
                 : "border-border/50 text-foreground/60 hover:border-rose-500/50 hover:text-rose-400"
-            }`}
+              }`}
           >
             Predict No
           </button>
@@ -142,13 +144,19 @@ export function MarketCard({ market }: MarketCardProps) {
 
         {/* Deposit button (appears when position selected) */}
         {selectedPosition && (
-          <Button 
-            className="w-full mt-4" 
-            size="sm"
-            onClick={handleDepositClick}
-          >
-            [Deposit to {selectedPosition === "yes" ? "Yes" : "No"}]
-          </Button>
+          <div className="mt-4 space-y-2">
+            <Button
+              className="w-full"
+              size="sm"
+              onClick={handleDepositClick}
+            >
+              [Stake on {selectedPosition === "yes" ? "Yes" : "No"}]
+            </Button>
+            <p className="text-[10px] font-mono text-center text-foreground/40 flex items-center justify-center gap-1">
+              <Shield className="w-2.5 h-2.5 text-emerald-500/60" />
+              Win yield or get refunded — you can't lose
+            </p>
+          </div>
         )}
       </div>
 
@@ -159,6 +167,7 @@ export function MarketCard({ market }: MarketCardProps) {
           onClose={handleCloseModal}
           marketId={market.id}
           marketQuestion={market.question}
+          marketExpiry={market.endDate}
           position={selectedPosition}
           currentOdds={getCurrentOdds()}
         />
