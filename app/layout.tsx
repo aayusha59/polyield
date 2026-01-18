@@ -4,6 +4,7 @@ import { Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { Header } from "@/components/header"
 import AppWalletProvider from "@/components/AppWalletProvider"
+import { SupabaseStatus } from "@/components/supabase-status"
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -27,6 +28,7 @@ export default function RootLayout({
         <AppWalletProvider>
           <Header />
           {children}
+          <SupabaseStatus />
         </AppWalletProvider>
       </body>
     </html>
