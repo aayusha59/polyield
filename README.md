@@ -1,4 +1,5 @@
 # PolyYield (Submitted to NexHacks 2026 🏆)
+# There is no token on pumpfun do not fall for scams
 
 **No-lose prediction markets on Solana**
 
